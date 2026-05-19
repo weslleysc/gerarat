@@ -1,0 +1,5 @@
+Copyright (c) 2026 Seu Nome Completo. Todos os direitos reservados.
+
+Este código é de propriedade exclusiva do autor. Nenhuma parte deste projeto 
+pode ser copiada, distribuída, modificada ou utilizada para qualquer finalidade, 
+comercial ou não comercial, sem a autorização prévia e por escrito do autor.
