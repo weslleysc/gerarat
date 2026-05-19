@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAT - Relatório de Atendimento Técnico</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+    <div id="formulario-rat" class="container">
+        <header class="header">
+            <h1>ARKLOK</h1>
+            <h2>RAT (RELATÓRIO ATENDIMENTO TÉCNICO)</h2>
+        </header>
+
+        <fieldset>
+            <legend>DADOS DO CHAMADO</legend>
+            <div class="campo">
+                <label>N° DO CHAMADO:</label>
+                <input type="text" id="chamado">
+            </div>
+            <div class="campo">
+                <label>ENDEREÇO DO CHAMADO:</label>
+                <input type="text" id="endereco">
+            </div>
+        </fieldset>
+
+        <fieldset class="secao-assinaturas">
+            <legend>ASSINATURAS</legend>
+            <div class="assinatura-box">
+                <label>ASSINATURA TÉCNICO</label>
+                <canvas id="canvas-tecnico" width="300" height="100"></canvas>
+                <button type="button" onclick="limparCanvas('canvas-tecnico')">Limpar Assinatura</button>
+            </div>
+        </fieldset>
+    </div>
+
+    <div class="botoes-acao">
+        <button id="btn-gerar" class="btn-principal">Gerar PDF</button>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
