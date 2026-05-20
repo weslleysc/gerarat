@@ -3,43 +3,316 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RAT - Relatório de Atendimento Técnico</title>
+    <title>Gerador de RAT - Eunerd 3.0</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-
-    <div id="formulario-rat" class="container">
+    <div class="container">
+        <!-- HEADER -->
         <header class="header">
-            <h1>ARKLOK</h1>
-            <h2>RAT (RELATÓRIO ATENDIMENTO TÉCNICO)</h2>
+            <div class="header-content">
+                <div>
+                    <h1>Gerador de RAT</h1>
+                    <p>Relatório de Atendimento Técnico - Eunerd 3.0</p>
+                </div>
+                <div class="header-buttons">
+                    <button id="btnGerar" class="btn btn-primary">📄 Gerar PDF</button>
+                    <button id="btnLimpar" class="btn btn-secondary">🔄 Limpar</button>
+                </div>
+            </div>
         </header>
 
-        <fieldset>
-            <legend>DADOS DO CHAMADO</legend>
-            <div class="campo">
-                <label>N° DO CHAMADO:</label>
-                <input type="text" id="chamado">
-            </div>
-            <div class="campo">
-                <label>ENDEREÇO DO CHAMADO:</label>
-                <input type="text" id="endereco">
-            </div>
-        </fieldset>
+        <!-- FORMULÁRIO -->
+        <form id="ratForm" class="form">
+            <!-- SEÇÃO 1: DADOS DO CLIENTE -->
+            <section class="form-section">
+                <h2>📋 Dados do Cliente</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Nome do Cliente</label>
+                        <input type="text" name="nomeCliente" placeholder="Digite o nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label>Nº Chamado Cliente</label>
+                        <input type="text" name="noChamadoCliente" placeholder="Digite o número do chamado">
+                    </div>
+                    <div class="form-group full">
+                        <label>Endereço</label>
+                        <input type="text" name="endereco" placeholder="Digite o endereço">
+                    </div>
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <input type="text" name="bairro" placeholder="Digite o bairro">
+                    </div>
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" name="cep" placeholder="00000-000">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" name="cidade" placeholder="Digite a cidade">
+                    </div>
+                    <div class="form-group">
+                        <label>UF</label>
+                        <input type="text" name="uf" placeholder="SP" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label>Contato/Responsável</label>
+                        <input type="text" name="contatoResponsavel" placeholder="Digite o responsável">
+                    </div>
+                    <div class="form-group">
+                        <label>Departamento</label>
+                        <input type="text" name="departamento" placeholder="Digite o departamento">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" name="telefone" placeholder="(11) 99999-9999">
+                    </div>
+                </div>
+            </section>
 
-        <fieldset class="secao-assinaturas">
-            <legend>ASSINATURAS</legend>
-            <div class="assinatura-box">
-                <label>ASSINATURA TÉCNICO</label>
-                <canvas id="canvas-tecnico" width="300" height="100"></canvas>
-                <button type="button" onclick="limparCanvas('canvas-tecnico')">Limpar Assinatura</button>
+            <!-- SEÇÃO 2: DADOS DO CHAMADO -->
+            <section class="form-section">
+                <h2>⏰ Dados do Chamado</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Data Início</label>
+                        <input type="date" name="dataInicio">
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Início</label>
+                        <input type="time" name="horaInicio">
+                    </div>
+                    <div class="form-group">
+                        <label>Data Término</label>
+                        <input type="date" name="dataTermino">
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Término</label>
+                        <input type="time" name="horaTermino">
+                    </div>
+                    <div class="form-group full">
+                        <label>Sintomas / Problema Relatado</label>
+                        <textarea name="sintomas" placeholder="Descreva os sintomas ou problema relatado" rows="4"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 3: DADOS DO TÉCNICO -->
+            <section class="form-section">
+                <h2>🔧 Dados do Técnico Eunerd</h2>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Nome do Técnico</label>
+                        <input type="text" name="nomeTecnico" placeholder="Digite o nome do técnico">
+                    </div>
+                    <div class="form-group full">
+                        <label>Endereço</label>
+                        <input type="text" name="enderecoDadosTecnico" placeholder="Digite o endereço">
+                    </div>
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <input type="text" name="bairroTecnico" placeholder="Digite o bairro">
+                    </div>
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" name="cidadeTecnico" placeholder="Digite a cidade">
+                    </div>
+                    <div class="form-group">
+                        <label>UF</label>
+                        <input type="text" name="ufTecnico" placeholder="SP" maxlength="2">
+                    </div>
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" name="telefoneTecnico" placeholder="(11) 99999-9999">
+                    </div>
+                    <div class="form-group full">
+                        <label>E-Mail</label>
+                        <input type="email" name="emailTecnico" placeholder="email@example.com">
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 4: DADOS DO EQUIPAMENTO -->
+            <section class="form-section">
+                <h2>💻 Dados do Equipamento</h2>
+                
+                <h3>Equipamento Antigo</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Modelo</label>
+                        <input type="text" name="equipAntigoModelo" placeholder="Digite o modelo">
+                    </div>
+                    <div class="form-group">
+                        <label>Host:Up</label>
+                        <input type="text" name="equipAntigoHostUp" placeholder="Digite o Host:Up">
+                    </div>
+                    <div class="form-group full">
+                        <label>Nº Série/Patrimônio</label>
+                        <input type="text" name="equipAntigoSerie" placeholder="Digite o número de série">
+                    </div>
+                    <div class="form-group full">
+                        <label>Tipo de Equipamento</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipAntigoDesktop"> Desktop
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipAntigoNotebook"> Notebook
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipAntigoImpressoras"> Impressoras
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipAntigoAtivoRede"> Ativo de Rede
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 20px;">Equipamento Novo</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Modelo</label>
+                        <input type="text" name="equipNovoModelo" placeholder="Digite o modelo">
+                    </div>
+                    <div class="form-group">
+                        <label>Host:Up</label>
+                        <input type="text" name="equipNovoHostUp" placeholder="Digite o Host:Up">
+                    </div>
+                    <div class="form-group full">
+                        <label>Nº Série/Patrimônio</label>
+                        <input type="text" name="equipNovoSerie" placeholder="Digite o número de série">
+                    </div>
+                    <div class="form-group full">
+                        <label>Tipo de Equipamento</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipNovoDesktop"> Desktop
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipNovoNotebook"> Notebook
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipNovoImpressoras"> Impressoras
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="equipNovoAtivoRede"> Ativo de Rede
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 5: DESCRIÇÃO DAS ATIVIDADES -->
+            <section class="form-section">
+                <h2>📝 Descrição das Atividades</h2>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Descrição das Atividades Realizadas</label>
+                        <textarea name="descricaoAtividades" placeholder="Descreva detalhadamente as atividades realizadas" rows="6"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 6: DADOS ADICIONAIS -->
+            <section class="form-section">
+                <h2>📌 Dados Adicionais</h2>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>Status do Equipamento</label>
+                        <select name="statusEquipamento">
+                            <option value="">-- Selecione --</option>
+                            <option value="Retirado para Laboratório">Retirado para Laboratório</option>
+                            <option value="Testado e Funcional">Testado e Funcional</option>
+                            <option value="Testado e Não Funcional">Testado e Não Funcional</option>
+                            <option value="Aguardando Peças">Aguardando Peças</option>
+                        </select>
+                    </div>
+                    <div class="form-group full">
+                        <label>Observações</label>
+                        <textarea name="observacao" placeholder="Digite observações adicionais se necessário" rows="4"></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 7: ASSINATURAS -->
+            <section class="form-section">
+                <h2>✍️ Assinaturas</h2>
+                
+                <div class="signatures-grid">
+                    <div class="signature-box">
+                        <h3>Assinatura do Técnico Eunerd</h3>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Nome do Técnico</label>
+                                <input type="text" name="nomeTecnicoAssinatura" placeholder="Digite o nome">
+                            </div>
+                            <div class="form-group full">
+                                <label>Nº Documento</label>
+                                <input type="text" name="nDocumentoTecnico" placeholder="Digite o número do documento">
+                            </div>
+                            <div class="form-group full">
+                                <label>Desenhe sua assinatura abaixo</label>
+                                <canvas id="canvasTecnico" class="signature-canvas"></canvas>
+                                <div class="canvas-buttons">
+                                    <button type="button" class="btn btn-small" onclick="limparAssinatura('canvasTecnico')">Limpar</button>
+                                    <button type="button" class="btn btn-small btn-primary" onclick="salvarAssinatura('canvasTecnico', 'assinaturaTecnicoData')">Salvar</button>
+                                </div>
+                                <div id="assinaturaTecnicoPreview" class="signature-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="signature-box">
+                        <h3>Assinatura do Cliente</h3>
+                        <div class="form-grid">
+                            <div class="form-group full">
+                                <label>Nome do Cliente</label>
+                                <input type="text" name="nomeClienteAssinatura" placeholder="Digite o nome">
+                            </div>
+                            <div class="form-group full">
+                                <label>Nº Documento</label>
+                                <input type="text" name="nDocumentoCliente" placeholder="Digite o número do documento">
+                            </div>
+                            <div class="form-group full">
+                                <label>Nº Contato</label>
+                                <input type="text" name="nContatoCliente" placeholder="Digite o número de contato">
+                            </div>
+                            <div class="form-group full">
+                                <label>Desenhe sua assinatura abaixo</label>
+                                <canvas id="canvasCliente" class="signature-canvas"></canvas>
+                                <div class="canvas-buttons">
+                                    <button type="button" class="btn btn-small" onclick="limparAssinatura('canvasCliente')">Limpar</button>
+                                    <button type="button" class="btn btn-small btn-primary" onclick="salvarAssinatura('canvasCliente', 'assinaturaClienteData')">Salvar</button>
+                                </div>
+                                <div id="assinaturaClientePreview" class="signature-preview"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- BOTÕES DE AÇÃO -->
+            <div class="action-buttons">
+                <button type="button" id="btnGerar2" class="btn btn-primary btn-large">📄 Gerar PDF</button>
+                <button type="button" id="btnSalvar" class="btn btn-secondary btn-large">💾 Salvar Dados</button>
+                <button type="button" id="btnLimpar2" class="btn btn-secondary btn-large">🔄 Limpar Tudo</button>
             </div>
-        </fieldset>
+        </form>
+
+        <!-- FOOTER -->
+        <footer class="footer">
+            <p><strong>Eunerd</strong> - Relatório de Atendimento Técnico</p>
+            <p>Empresa Uen Nerd | Cubo Itaú | Alameda Vincente Pinzon 54 | 6º Andar</p>
+            <p>Vila Olímpia, São Paulo - SP - CEP 04547-130</p>
+            <p>Informações: <a href="https://encontreunerd.com.br" target="_blank">https://encontreunerd.com.br</a></p>
+        </footer>
     </div>
 
-    <div class="botoes-acao">
-        <button id="btn-gerar" class="btn-principal">Gerar PDF</button>
-    </div>
+    <!-- Hidden div para gerar PDF -->
+    <div id="pdfContent" style="display: none;"></div>
 
     <script src="script.js"></script>
 </body>
