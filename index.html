@@ -3,317 +3,931 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de RAT - Eunerd 3.0</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Relatório de Atendimento Técnico - Eunerd</title>
+    <!-- Google Fonts para máxima fidelidade tipográfica comercial -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para os botões do painel web -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Biblioteca Html2Pdf.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #001e62;
+            --secondary-cyan: #00a4e4;
+            --border-dark: #1a1a1a;
+            --bg-web: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-web);
+            color: #000000;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Painel Superior de Ações (Fixo e Não Sai no PDF) */
+        .painel-acoes {
+            width: 100%;
+            max-width: 210mm;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            gap: 15px;
+        }
+
+        .btn {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 13px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-limpar {
+            background-color: #64748b;
+            color: white;
+        }
+
+        .btn-limpar:hover {
+            background-color: #475569;
+        }
+
+        .btn-gerar {
+            background-color: var(--primary-blue);
+            color: white;
+            border: 1px solid var(--primary-blue);
+        }
+
+        .btn-gerar:hover {
+            background-color: #00133e;
+        }
+
+        /* --- FOLHA A4 DO RELATÓRIO (DIMENSÕES RÍGIDAS DE A4) --- */
+        .rat-sheet {
+            background-color: #ffffff;
+            width: 210mm;
+            height: 297mm; /* Altura exata da folha A4 */
+            padding: 10mm 12mm; /* Margens internas ideais para não cortar na impressão */
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Espalha as seções equilibradamente */
+            box-sizing: border-box;
+        }
+
+        /* Header Layout */
+        .rat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .header-brand h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            line-height: 1;
+        }
+
+        .header-brand h2 {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--secondary-cyan);
+            text-transform: uppercase;
+            margin-bottom: 3px;
+        }
+
+        .header-brand p {
+            font-size: 8px;
+            color: #555555;
+            line-height: 1.2;
+        }
+
+        .header-brand p a {
+            color: var(--secondary-cyan);
+            text-decoration: none;
+        }
+
+        .header-title-box {
+            border: 1.5px solid var(--border-dark);
+            padding: 6px 12px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .header-title-box h3 {
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Divisores de Seção */
+        .secao-titulo {
+            background-color: var(--primary-blue);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 8px;
+            margin-bottom: 0;
+            border: 1px solid var(--border-dark);
+            border-bottom: none;
+        }
+
+        /* Sistema de Grid em Formato de Tabela com Bordas */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            border: 1px solid var(--border-dark);
+            background-color: var(--border-dark);
+            column-gap: 1px; /* Linha de divisão vertical */
+            row-gap: 0;     /* Linhas horizontais geradas pelas bordas dos campos */
+        }
+
+        .col-12 { grid-column: span 12; }
+        .col-9 { grid-column: span 9; }
+        .col-8 { grid-column: span 8; }
+        .col-6 { grid-column: span 6; }
+        .col-5 { grid-column: span 5; }
+        .col-4 { grid-column: span 4; }
+        .col-3 { grid-column: span 3; }
+        .col-2 { grid-column: span 2; }
+
+        /* Campos Individuais dentro do Grid */
+        .field {
+            background-color: #ffffff;
+            padding: 4px 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        /* Linha horizontal interna garantida para evitar erros de renderização no PDF */
+        .border-b-field {
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .field label {
+            font-size: 8px;
+            font-weight: 700;
+            color: #333333;
+            text-transform: uppercase;
+            margin-bottom: 1px;
+        }
+
+        .field input[type="text"],
+        .field input[type="date"],
+        .field input[type="time"],
+        .field select {
+            border: none;
+            outline: none;
+            font-size: 10px;
+            font-family: 'Inter', sans-serif;
+            color: #000000;
+            width: 100%;
+            padding: 1px 0;
+            background-color: transparent;
+        }
+
+        /* Seção Interna para Atendimento vs Técnico / Equipamentos */
+        .sub-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border: 1px solid var(--border-dark);
+            background-color: #ffffff;
+        }
+
+        .sub-col {
+            background-color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Linha divisória vertical perfeita no meio entre Atendimento e Técnico */
+        .sub-col:first-child {
+            border-right: 1px solid var(--border-dark);
+        }
+
+        .sub-header-title {
+            background-color: #e2e8f0;
+            font-size: 9px;
+            font-weight: 800;
+            text-align: center;
+            padding: 3px;
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .sub-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            background-color: var(--border-dark);
+            column-gap: 1px;
+            row-gap: 0;
+            flex-grow: 1; /* Faz o grid preencher toda a altura disponível */
+        }
+
+        /* Força as linhas internas do Atendimento a preencherem o espaço vertical */
+        .sub-grid-atend {
+            grid-template-rows: auto auto 1fr; 
+        }
+
+        /* Força as linhas internas do Equipamento a alinhar as caixas de seleção na base */
+        .sub-grid-equip {
+            grid-template-rows: auto auto auto 1fr;
+        }
+
+        /* Permite que o campo de input de sintoma estique de forma elegante */
+        .stretch-field {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        /* Checkboxes de Equipamento */
+        .chk-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding: 5px 6px;
+            background-color: #ffffff;
+            align-items: center;
+        }
+
+        .chk-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 9px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .chk-item input[type="checkbox"] {
+            width: 12px;
+            height: 12px;
+            cursor: pointer;
+            accent-color: var(--primary-blue);
+        }
+
+        /* Textarea de Descrição */
+        .textarea-field {
+            background-color: #ffffff;
+            border: 1px solid var(--border-dark);
+            padding: 6px;
+        }
+
+        .textarea-field textarea {
+            width: 100%;
+            min-height: 70px;
+            border: none;
+            outline: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 10px;
+            resize: none;
+            line-height: 1.3;
+        }
+
+        /* Termo e Assinaturas */
+        .termo-aceite {
+            font-size: 8.5px;
+            color: #222222;
+            line-height: 1.3;
+            padding: 6px;
+            border: 1px solid var(--border-dark);
+            background-color: #f8fafc;
+            text-align: justify;
+        }
+
+        /* Painel de Assinaturas */
+        .assinaturas-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background-color: var(--border-dark);
+            gap: 1px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .col-assinatura {
+            background-color: #ffffff;
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .canvas-area {
+            position: relative;
+            background-color: #fafafa;
+            border: 1px dashed #7f8c8d;
+            height: 65px;
+            width: 100%;
+            border-radius: 4px;
+        }
+
+        .canvas-area canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+        }
+
+        .canvas-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .btn-clear-canvas {
+            background-color: #ef4444;
+            color: white;
+            border: none;
+            padding: 2px 5px;
+            font-size: 8px;
+            font-weight: 700;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        /* --- MODAL DE CONFIRMAÇÃO EXCLUSIVO (Substitui o "confirm" padrão) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+            display: none; /* Ativado via JS */
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+
+        .modal-box {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 6px;
+            border: 2px solid var(--primary-blue);
+            width: 90%;
+            max-width: 420px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        .modal-box h4 {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--primary-blue);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .modal-box p {
+            font-size: 13px;
+            color: #333333;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-modal {
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 12px;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .btn-modal-cancelar {
+            background-color: #e2e8f0;
+            color: #333333;
+        }
+
+        .btn-modal-cancelar:hover {
+            background-color: #cbd5e1;
+        }
+
+        .btn-modal-confirmar {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .btn-modal-confirmar:hover {
+            background-color: #dc2626;
+        }
+
+        /* --- IMPRESSÃO / REGRAS DE PDF --- */
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                background-color: #ffffff;
+                padding: 0;
+                margin: 0;
+            }
+            .painel-acoes, .modal-overlay {
+                display: none !important;
+            }
+            .rat-sheet {
+                box-shadow: none;
+                border: none;
+                padding: 10mm 12mm;
+                width: 210mm;
+                height: 297mm;
+                page-break-inside: avoid;
+            }
+            .btn-clear-canvas {
+                display: none !important;
+            }
+            .canvas-area {
+                border: none !important;
+                background-color: transparent !important;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <!-- HEADER -->
-        <header class="header">
-            <div class="header-content">
-                <div>
-                    <h1>Gerador de RAT</h1>
-                    <p>Relatório de Atendimento Técnico - Eunerd 3.0</p>
-                </div>
-                <div class="header-buttons">
-                    <button id="btnGerar" class="btn btn-primary">📄 Gerar PDF</button>
-                    <button id="btnLimpar" class="btn btn-secondary">🔄 Limpar</button>
-                </div>
+
+    <!-- PAINEL DE CONTROLE DE PÁGINA (Não sai no PDF) -->
+    <div class="painel-acoes">
+        <button onclick="abrirModalConfirmacao()" class="btn btn-limpar">
+            <i class="fa-solid fa-rotate-left"></i> Limpar Tudo
+        </button>
+        <button id="btn-salvar" class="btn btn-gerar">
+            <i class="fa-solid fa-file-pdf"></i> Salvar RAT como PDF (A4)
+        </button>
+    </div>
+
+    <!-- DOCUMENTO RAT PRINCIPAL -->
+    <div id="documento-rat" class="rat-sheet">
+        
+        <!-- CABEÇALHO -->
+        <header class="rat-header">
+            <div class="header-brand">
+                <h1>EUNERD</h1>
+                <h2>Encontre Um Nerd</h2>
+                <p>
+                    Cubo Itaú Alameda Vincente Pinzon 54 6° Andar<br>
+                    Vila Olímpia, São Paulo- SP CEP 04547-130<br>
+                    Informações acesse: <a href="https://encontreumnerd.com.br" target="_blank">https://encontreumnerd.com.br</a>
+                </p>
+            </div>
+            <div class="header-title-box">
+                <h3>DADOS DO CLIENTE</h3>
             </div>
         </header>
 
-        <!-- FORMULÁRIO -->
-        <form id="ratForm" class="form">
-            <!-- SEÇÃO 1: DADOS DO CLIENTE -->
-            <section class="form-section">
-                <h2>📋 Dados do Cliente</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Nome do Cliente</label>
-                        <input type="text" name="nomeCliente" placeholder="Digite o nome do cliente">
-                    </div>
-                    <div class="form-group">
-                        <label>Nº Chamado Cliente</label>
-                        <input type="text" name="noChamadoCliente" placeholder="Digite o número do chamado">
-                    </div>
-                    <div class="form-group full">
-                        <label>Endereço</label>
-                        <input type="text" name="endereco" placeholder="Digite o endereço">
-                    </div>
-                    <div class="form-group">
-                        <label>Bairro</label>
-                        <input type="text" name="bairro" placeholder="Digite o bairro">
-                    </div>
-                    <div class="form-group">
-                        <label>CEP</label>
-                        <input type="text" name="cep" placeholder="00000-000">
-                    </div>
-                    <div class="form-group">
-                        <label>Cidade</label>
-                        <input type="text" name="cidade" placeholder="Digite a cidade">
-                    </div>
-                    <div class="form-group">
-                        <label>UF</label>
-                        <input type="text" name="uf" placeholder="SP" maxlength="2">
-                    </div>
-                    <div class="form-group">
-                        <label>Contato/Responsável</label>
-                        <input type="text" name="contatoResponsavel" placeholder="Digite o responsável">
-                    </div>
-                    <div class="form-group">
-                        <label>Departamento</label>
-                        <input type="text" name="departamento" placeholder="Digite o departamento">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="text" name="telefone" placeholder="(11) 99999-9999">
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 2: DADOS DO CHAMADO -->
-            <section class="form-section">
-                <h2>⏰ Dados do Chamado</h2>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Data Início</label>
-                        <input type="date" name="dataInicio">
-                    </div>
-                    <div class="form-group">
-                        <label>Hora Início</label>
-                        <input type="time" name="horaInicio">
-                    </div>
-                    <div class="form-group">
-                        <label>Data Término</label>
-                        <input type="date" name="dataTermino">
-                    </div>
-                    <div class="form-group">
-                        <label>Hora Término</label>
-                        <input type="time" name="horaTermino">
-                    </div>
-                    <div class="form-group full">
-                        <label>Sintomas / Problema Relatado</label>
-                        <textarea name="sintomas" placeholder="Descreva os sintomas ou problema relatado" rows="4"></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 3: DADOS DO TÉCNICO -->
-            <section class="form-section">
-                <h2>🔧 Dados do Técnico Eunerd</h2>
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>Nome do Técnico</label>
-                        <input type="text" name="nomeTecnico" placeholder="Digite o nome do técnico">
-                    </div>
-                    <div class="form-group full">
-                        <label>Endereço</label>
-                        <input type="text" name="enderecoDadosTecnico" placeholder="Digite o endereço">
-                    </div>
-                    <div class="form-group">
-                        <label>Bairro</label>
-                        <input type="text" name="bairroTecnico" placeholder="Digite o bairro">
-                    </div>
-                    <div class="form-group">
-                        <label>Cidade</label>
-                        <input type="text" name="cidadeTecnico" placeholder="Digite a cidade">
-                    </div>
-                    <div class="form-group">
-                        <label>UF</label>
-                        <input type="text" name="ufTecnico" placeholder="SP" maxlength="2">
-                    </div>
-                    <div class="form-group">
-                        <label>Telefone</label>
-                        <input type="text" name="telefoneTecnico" placeholder="(11) 99999-9999">
-                    </div>
-                    <div class="form-group full">
-                        <label>E-Mail</label>
-                        <input type="email" name="emailTecnico" placeholder="email@example.com">
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 4: DADOS DO EQUIPAMENTO -->
-            <section class="form-section">
-                <h2>💻 Dados do Equipamento</h2>
-                
-                <h3>Equipamento Antigo</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Modelo</label>
-                        <input type="text" name="equipAntigoModelo" placeholder="Digite o modelo">
-                    </div>
-                    <div class="form-group">
-                        <label>Host:Up</label>
-                        <input type="text" name="equipAntigoHostUp" placeholder="Digite o Host:Up">
-                    </div>
-                    <div class="form-group full">
-                        <label>Nº Série/Patrimônio</label>
-                        <input type="text" name="equipAntigoSerie" placeholder="Digite o número de série">
-                    </div>
-                    <div class="form-group full">
-                        <label>Tipo de Equipamento</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipAntigoDesktop"> Desktop
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipAntigoNotebook"> Notebook
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipAntigoImpressoras"> Impressoras
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipAntigoAtivoRede"> Ativo de Rede
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 style="margin-top: 20px;">Equipamento Novo</h3>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>Modelo</label>
-                        <input type="text" name="equipNovoModelo" placeholder="Digite o modelo">
-                    </div>
-                    <div class="form-group">
-                        <label>Host:Up</label>
-                        <input type="text" name="equipNovoHostUp" placeholder="Digite o Host:Up">
-                    </div>
-                    <div class="form-group full">
-                        <label>Nº Série/Patrimônio</label>
-                        <input type="text" name="equipNovoSerie" placeholder="Digite o número de série">
-                    </div>
-                    <div class="form-group full">
-                        <label>Tipo de Equipamento</label>
-                        <div class="checkbox-group">
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipNovoDesktop"> Desktop
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipNovoNotebook"> Notebook
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipNovoImpressoras"> Impressoras
-                            </label>
-                            <label class="checkbox-label">
-                                <input type="checkbox" name="equipNovoAtivoRede"> Ativo de Rede
-                            </label>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 5: DESCRIÇÃO DAS ATIVIDADES -->
-            <section class="form-section">
-                <h2>📝 Descrição das Atividades</h2>
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>Descrição das Atividades Realizadas</label>
-                        <textarea name="descricaoAtividades" placeholder="Descreva detalhadamente as atividades realizadas" rows="6"></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 6: DADOS ADICIONAIS -->
-            <section class="form-section">
-                <h2>📌 Dados Adicionais</h2>
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>Status do Equipamento</label>
-                        <select name="statusEquipamento">
-                            <option value="">-- Selecione --</option>
-                            <option value="Retirado para Laboratório">Retirado para Laboratório</option>
-                            <option value="Testado e Funcional">Testado e Funcional</option>
-                            <option value="Testado e Não Funcional">Testado e Não Funcional</option>
-                            <option value="Aguardando Peças">Aguardando Peças</option>
-                        </select>
-                    </div>
-                    <div class="form-group full">
-                        <label>Observações</label>
-                        <textarea name="observacao" placeholder="Digite observações adicionais se necessário" rows="4"></textarea>
-                    </div>
-                </div>
-            </section>
-
-            <!-- SEÇÃO 7: ASSINATURAS -->
-            <section class="form-section">
-                <h2>✍️ Assinaturas</h2>
-                
-                <div class="signatures-grid">
-                    <div class="signature-box">
-                        <h3>Assinatura do Técnico Eunerd</h3>
-                        <div class="form-grid">
-                            <div class="form-group full">
-                                <label>Nome do Técnico</label>
-                                <input type="text" name="nomeTecnicoAssinatura" placeholder="Digite o nome">
-                            </div>
-                            <div class="form-group full">
-                                <label>Nº Documento</label>
-                                <input type="text" name="nDocumentoTecnico" placeholder="Digite o número do documento">
-                            </div>
-                            <div class="form-group full">
-                                <label>Desenhe sua assinatura abaixo</label>
-                                <canvas id="canvasTecnico" class="signature-canvas"></canvas>
-                                <div class="canvas-buttons">
-                                    <button type="button" class="btn btn-small" onclick="limparAssinatura('canvasTecnico')">Limpar</button>
-                                    <button type="button" class="btn btn-small btn-primary" onclick="salvarAssinatura('canvasTecnico', 'assinaturaTecnicoData')">Salvar</button>
-                                </div>
-                                <div id="assinaturaTecnicoPreview" class="signature-preview"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="signature-box">
-                        <h3>Assinatura do Cliente</h3>
-                        <div class="form-grid">
-                            <div class="form-group full">
-                                <label>Nome do Cliente</label>
-                                <input type="text" name="nomeClienteAssinatura" placeholder="Digite o nome">
-                            </div>
-                            <div class="form-group full">
-                                <label>Nº Documento</label>
-                                <input type="text" name="nDocumentoCliente" placeholder="Digite o número do documento">
-                            </div>
-                            <div class="form-group full">
-                                <label>Nº Contato</label>
-                                <input type="text" name="nContatoCliente" placeholder="Digite o número de contato">
-                            </div>
-                            <div class="form-group full">
-                                <label>Desenhe sua assinatura abaixo</label>
-                                <canvas id="canvasCliente" class="signature-canvas"></canvas>
-                                <div class="canvas-buttons">
-                                    <button type="button" class="btn btn-small" onclick="limparAssinatura('canvasCliente')">Limpar</button>
-                                    <button type="button" class="btn btn-small btn-primary" onclick="salvarAssinatura('canvasCliente', 'assinaturaClienteData')">Salvar</button>
-                                </div>
-                                <div id="assinaturaClientePreview" class="signature-preview"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- BOTÕES DE AÇÃO -->
-            <div class="action-buttons">
-                <button type="button" id="btnGerar2" class="btn btn-primary btn-large">📄 Gerar PDF</button>
-                <button type="button" id="btnSalvar" class="btn btn-secondary btn-large">💾 Salvar Dados</button>
-                <button type="button" id="btnLimpar2" class="btn btn-secondary btn-large">🔄 Limpar Tudo</button>
+        <!-- SEÇÃO: DADOS DO CLIENTE -->
+        <div class="form-grid">
+            <div class="field col-8 border-b-field">
+                <label>Nome do cliente:</label>
+                <input type="text" id="cli-nome" placeholder="Digite o nome completo do cliente">
             </div>
-        </form>
+            <div class="field col-4 border-b-field">
+                <label>No chamado cliente:</label>
+                <input type="text" id="cli-chamado" placeholder="Nº do Chamado">
+            </div>
 
-        <!-- FOOTER -->
-        <footer class="footer">
-            <p><strong>Eunerd</strong> - Relatório de Atendimento Técnico</p>
-            <p>Empresa Uen Nerd | Cubo Itaú | Alameda Vincente Pinzon 54 | 6º Andar</p>
-            <p>Vila Olímpia, São Paulo - SP - CEP 04547-130</p>
-            <p>Informações: <a href="https://encontreunerd.com.br" target="_blank">https://encontreunerd.com.br</a></p>
-        </footer>
+            <div class="field col-6 border-b-field">
+                <label>Endereço:</label>
+                <input type="text" id="cli-endereco" placeholder="Rua, Av, etc.">
+            </div>
+            <div class="field col-4 border-b-field">
+                <label>Bairro:</label>
+                <input type="text" id="cli-bairro" placeholder="Bairro">
+            </div>
+            <div class="field col-2 border-b-field">
+                <label>N°:</label>
+                <input type="text" id="cli-num" placeholder="Nº">
+            </div>
+
+            <div class="field col-3 border-b-field">
+                <label>CEP:</label>
+                <input type="text" id="cli-cep" placeholder="00000-000">
+            </div>
+            <div class="field col-5 border-b-field">
+                <label>Cidade:</label>
+                <input type="text" id="cli-cidade" placeholder="Cidade">
+            </div>
+            <div class="field col-4 border-b-field">
+                <label>Departamento:</label>
+                <input type="text" id="cli-depto" placeholder="Departamento">
+            </div>
+
+            <div class="field col-6">
+                <label>Contato/Responsável:</label>
+                <input type="text" id="cli-contato" placeholder="Nome de contato do cliente">
+            </div>
+            <div class="field col-6">
+                <label>Telefone:</label>
+                <input type="text" id="cli-tel" placeholder="(00) 00000-0000">
+            </div>
+        </div>
+
+        <!-- TÍTULO: DADOS DO CHAMADO -->
+        <h4 class="secao-titulo">DADOS DO CHAMADO</h4>
+
+        <!-- CONTAINER SUBDIVIDIDO LADO A LADO -->
+        <div class="sub-container">
+            <!-- COLUNA: ATENDIMENTO -->
+            <div class="sub-col">
+                <div class="sub-header-title">Atendimento</div>
+                <div class="sub-grid sub-grid-atend">
+                    <div class="field col-6 border-b-field">
+                        <label>Data Início:</label>
+                        <input type="date" id="atend-data-inicio">
+                    </div>
+                    <div class="field col-6 border-b-field">
+                        <label>Hora Início:</label>
+                        <input type="time" id="atend-hora-inicio">
+                    </div>
+                    <div class="field col-6 border-b-field">
+                        <label>Data Término:</label>
+                        <input type="date" id="atend-data-fim">
+                    </div>
+                    <div class="field col-6 border-b-field">
+                        <label>Hora Término:</label>
+                        <input type="time" id="atend-hora-fim">
+                    </div>
+                    <div class="field col-12 stretch-field">
+                        <label>Sintoma:</label>
+                        <input type="text" id="atend-sintoma" placeholder="Defeito / Sintoma relatado">
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUNA: TÉCNICO EUNERD -->
+            <div class="sub-col">
+                <div class="sub-header-title">Técnico Eunerd</div>
+                <div class="sub-grid">
+                    <div class="field col-8 border-b-field">
+                        <label>Nome:</label>
+                        <input type="text" id="tec-nome" placeholder="Nome do técnico">
+                    </div>
+                    <div class="field col-4 border-b-field">
+                        <label>Chamado:</label>
+                        <input type="text" id="tec-chamado" placeholder="ID Chamado">
+                    </div>
+                    <div class="field col-12 border-b-field">
+                        <label>Endereço:</label>
+                        <input type="text" id="tec-endereco" placeholder="Endereço">
+                    </div>
+                    <div class="field col-5 border-b-field">
+                        <label>Bairro:</label>
+                        <input type="text" id="tec-bairro" placeholder="Bairro">
+                    </div>
+                    <div class="field col-5 border-b-field">
+                        <label>Cidade:</label>
+                        <input type="text" id="tec-cidade" placeholder="Cidade">
+                    </div>
+                    <div class="field col-2 border-b-field">
+                        <label>UF:</label>
+                        <input type="text" id="tec-uf" placeholder="UF">
+                    </div>
+                    <div class="field col-6">
+                        <label>Telefone:</label>
+                        <input type="text" id="tec-tel" placeholder="Telefone do técnico">
+                    </div>
+                    <div class="field col-6">
+                        <label>E-Mail:</label>
+                        <input type="text" id="tec-email" placeholder="email@eunerd.com">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TÍTULO: DADOS DO EQUIPAMENTO -->
+        <h4 class="secao-titulo">DADOS DO EQUIPAMENTO</h4>
+
+        <!-- CONTAINER SUBDIVIDIDO LADO A LADO PARA EQUIPAMENTOS -->
+        <div class="sub-container">
+            <!-- EQUIPAMENTO ANTIGO -->
+            <div class="sub-col">
+                <div class="sub-header-title">Equipamento antigo</div>
+                <div class="sub-grid sub-grid-equip">
+                    <div class="field col-12 border-b-field">
+                        <label>Modelo:</label>
+                        <input type="text" id="ant-modelo" placeholder="Modelo do equipamento antigo">
+                    </div>
+                    <div class="field col-12 border-b-field">
+                        <label>Host\Ip:</label>
+                        <input type="text" id="ant-host-ip" placeholder="Nome do Host ou IP">
+                    </div>
+                    <div class="field col-12 border-b-field">
+                        <label>N° Série Patrimonio:</label>
+                        <input type="text" id="ant-serie-pat" placeholder="Número de série/patrimônio">
+                    </div>
+                    <div class="col-12 chk-container">
+                        <label class="chk-item"><input type="checkbox" id="ant-type-desk"> Desktop</label>
+                        <label class="chk-item"><input type="checkbox" id="ant-type-note"> Notebook</label>
+                        <label class="chk-item"><input type="checkbox" id="ant-type-imp"> Impressora</label>
+                        <label class="chk-item"><input type="checkbox" id="ant-type-rede"> Ativ. de rede</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EQUIPAMENTO NOVO -->
+            <div class="sub-col">
+                <div class="sub-header-title">Equipamento novo</div>
+                <div class="sub-grid sub-grid-equip">
+                    <div class="field col-12 border-b-field">
+                        <label>Modelo:</label>
+                        <input type="text" id="nov-modelo" placeholder="Modelo do equipamento novo">
+                    </div>
+                    <div class="field col-12 border-b-field">
+                        <label>Host\Ip:</label>
+                        <input type="text" id="nov-host-ip" placeholder="Nome do Host ou IP">
+                    </div>
+                    <div class="field col-12 border-b-field">
+                        <label>N° Série Patrimonio:</label>
+                        <input type="text" id="nov-serie-pat" placeholder="Número de série/patrimônio">
+                    </div>
+                    <div class="col-12 chk-container">
+                        <label class="chk-item"><input type="checkbox" id="nov-type-desk"> Desktop</label>
+                        <label class="chk-item"><input type="checkbox" id="nov-type-note"> Notebook</label>
+                        <label class="chk-item"><input type="checkbox" id="nov-type-imp"> Impressora</label>
+                        <label class="chk-item"><input type="checkbox" id="nov-type-rede"> Ativ. de rede</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TÍTULO: DESCRIÇÃO DAS ATIVIDADES -->
+        <h4 class="secao-titulo">DESCRIÇÃO DAS ATIVIDADES</h4>
+        <div class="textarea-field">
+            <textarea id="desc-atividades" placeholder="Descreva aqui todas as atividades realizadas pelo técnico detalhadamente..."></textarea>
+        </div>
+
+        <!-- TÍTULO: DADOS ADICIONAIS -->
+        <h4 class="secao-titulo">DADOS ADICIONAIS</h4>
+        
+        <!-- Termo de Acordo Oficial Eunerd -->
+        <div class="termo-aceite">
+            Estou de acordo com o presente relatório. O equipamento e/ou produto foi testado no termino do trabalho e/ou retirada e está funcional.
+        </div>
+
+        <!-- Campo de Observação -->
+        <div class="form-grid" style="border-top: none;">
+            <div class="field col-12">
+                <label>Observação:</label>
+                <input type="text" id="obs-adicional" placeholder="Observações adicionais se aplicável">
+            </div>
+        </div>
+
+        <!-- Colunas de Assinatura conforme o Layout -->
+        <div class="assinaturas-row">
+            <!-- Técnico -->
+            <div class="col-assinatura">
+                <div class="field border-b-field" style="padding: 0; background: transparent;">
+                    <label>Nome Técnico Eunerd:</label>
+                    <input type="text" id="ass-tec-nome" placeholder="Nome do técnico responsável">
+                </div>
+                <div class="field border-b-field" style="padding: 0; background: transparent;">
+                    <label>N° documento:</label>
+                    <input type="text" id="ass-tec-doc" placeholder="Número do RG/CPF do técnico">
+                </div>
+                <div class="field" style="padding: 0; background: transparent;">
+                    <label>Assinatura:</label>
+                    <div class="canvas-area">
+                        <canvas id="canvas-tecnico"></canvas>
+                    </div>
+                    <div class="canvas-header">
+                        <button type="button" class="btn-clear-canvas" onclick="limparAssinatura('canvas-tecnico')">Limpar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cliente -->
+            <div class="col-assinatura">
+                <div class="field border-b-field" style="padding: 0; background: transparent;">
+                    <label>Nome Cliente:</label>
+                    <input type="text" id="ass-cli-nome" placeholder="Nome do responsável do cliente">
+                </div>
+                <div class="field border-b-field" style="padding: 0; background: transparent;">
+                    <label>N° documento ou matricula:</label>
+                    <input type="text" id="ass-cli-doc" placeholder="RG, CPF ou Matrícula">
+                </div>
+                <div class="field border-b-field" style="padding: 0; background: transparent;">
+                    <label>Nº contato:</label>
+                    <input type="text" id="ass-cli-tel" placeholder="Telefone do responsável">
+                </div>
+                <div class="field" style="padding: 0; background: transparent;">
+                    <label>Assinatura:</label>
+                    <div class="canvas-area">
+                        <canvas id="canvas-cliente"></canvas>
+                    </div>
+                    <div class="canvas-header">
+                        <button type="button" class="btn-clear-canvas" onclick="limparAssinatura('canvas-cliente')">Limpar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <!-- Hidden div para gerar PDF -->
-    <div id="pdfContent" style="display: none;"></div>
+    <!-- MODAL DE CONFIRMAÇÃO PERSONALIZADO (Não sai na impressão/PDF) -->
+    <div id="modal-confirmacao" class="modal-overlay">
+        <div class="modal-box">
+            <h4>Limpar Formulário</h4>
+            <p>Tem a certeza de que deseja apagar permanentemente todos os dados preenchidos e assinaturas deste documento?</p>
+            <div class="modal-footer">
+                <button onclick="fecharModalConfirmacao()" class="btn-modal btn-modal-cancelar">Cancelar</button>
+                <button onclick="executarLimparTudo()" class="btn-modal btn-modal-confirmar">Sim, Limpar Tudo</button>
+            </div>
+        </div>
+    </div>
 
-    <script src="script.js"></script>
+    <!-- SCRIPT DE EXECUÇÃO -->
+    <script>
+        // Configuração dos Painéis de Assinatura Digital
+        function inicializarAssinatura(idCanvas) {
+            const canvas = document.getElementById(idCanvas);
+            const ctx = canvas.getContext("2d");
+            let desenhando = false;
+
+            // Ajusta o tamanho interno baseado nas dimensões reais do elemento
+            function ajustarCanvas() {
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.strokeStyle = "#001e62"; // Azul Oficial Eunerd para a "tinta"
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = "round";
+                ctx.lineJoin = "round";
+            }
+
+            ajustarCanvas();
+            window.addEventListener("resize", ajustarCanvas);
+
+            function pegarCoordenadas(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function iniciar(e) {
+                desenhando = true;
+                const pos = pegarCoordenadas(e);
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function desenhar(e) {
+                if (!desenhando) return;
+                e.preventDefault(); // Previne scroll da tela no celular
+                const pos = pegarCoordenadas(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+
+            function parar() {
+                desenhando = false;
+            }
+
+            // Mouse
+            canvas.addEventListener("mousedown", iniciar);
+            canvas.addEventListener("mousemove", desenhar);
+            window.addEventListener("mouseup", parar);
+
+            // Touch
+            canvas.addEventListener("touchstart", iniciar);
+            canvas.addEventListener("touchmove", desenhar);
+            window.addEventListener("touchend", parar);
+        }
+
+        // Limpar Assinatura
+        function limparAssinatura(idCanvas) {
+            const canvas = document.getElementById(idCanvas);
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Auto-sincronia de preenchimento inteligente
+        document.getElementById("tec-nome").addEventListener("input", function(e) {
+            document.getElementById("ass-tec-nome").value = e.target.value;
+        });
+
+        document.getElementById("cli-contato").addEventListener("input", function(e) {
+            document.getElementById("ass-cli-nome").value = e.target.value;
+        });
+
+        document.getElementById("cli-tel").addEventListener("input", function(e) {
+            document.getElementById("ass-cli-tel").value = e.target.value;
+        });
+
+        // Controles do Modal de Confirmação Personalizado
+        function abrirModalConfirmacao() {
+            document.getElementById("modal-confirmacao").style.display = "flex";
+        }
+
+        function fecharModalConfirmacao() {
+            document.getElementById("modal-confirmacao").style.display = "none";
+        }
+
+        // Executa a limpeza completa (chamado após confirmar no modal)
+        function executarLimparTudo() {
+            // Limpa todos os inputs de texto, datas, horas e caixas de texto multilinha
+            const inputs = document.querySelectorAll('input[type="text"], input[type="date"], input[type="time"], textarea');
+            inputs.forEach(i => i.value = "");
+
+            // Desmarca todas as caixas de seleção (checkboxes)
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(c => c.checked = false);
+
+            // Apaga as assinaturas nos elementos canvas
+            limparAssinatura("canvas-tecnico");
+            limparAssinatura("canvas-cliente");
+
+            // Define novamente a data atual por padrão
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById("atend-data-inicio").value = hoje;
+            document.getElementById("atend-data-fim").value = hoje;
+
+            // Fecha o modal
+            fecharModalConfirmacao();
+        }
+
+        // Inicializador Onload
+        window.onload = function() {
+            inicializarAssinatura("canvas-tecnico");
+            inicializarAssinatura("canvas-cliente");
+
+            // Auto preencher com a data de hoje para poupar esforço ao abrir o form
+            const hoje = new Date().toISOString().split('T')[0];
+            document.getElementById("atend-data-inicio").value = hoje;
+            document.getElementById("atend-data-fim").value = hoje;
+        };
+
+        // Geração Inteligente de PDF (HTML para PDF mantendo proporções A4 exatas)
+        document.getElementById("btn-salvar").addEventListener("click", () => {
+            const element = document.getElementById("documento-rat");
+            const IDChamado = document.getElementById("cli-chamado").value || "Geral";
+
+            // Opções do Html2Pdf para travar estritamente nas dimensões A4 (210mm x 297mm)
+            const opt = {
+                margin: 0, 
+                filename: `RAT_EUNERD_${IDChamado}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: true
+                },
+                jsPDF: { 
+                    unit: 'mm', 
+                    format: 'a4', 
+                    orientation: 'portrait' 
+                }
+            };
+
+            // Executa a exportação
+            html2pdf().set(opt).from(element).save();
+        });
+    </script>
 </body>
 </html>
