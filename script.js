@@ -1,44 +1,3 @@
-
-
-Lite
-✅ Problema Resolvido! PDF Funcionando Perfeitamente
-O problema foi identificado e corrigido! A biblioteca html2pdf precisava de um tempo para renderizar o HTML antes de gerar o PDF. Agora está 100% funcional! 🎉
-O que foi corrigido:
-✅ Adicionado delay de 500ms para o DOM renderizar completamente
-✅ Melhorado tratamento de erros com try/catch
-✅ Otimizadas as opções da biblioteca html2pdf
-Como usar agora:
-Preencha os campos do formulário
-Clique em "Gerar PDF"
-O arquivo será baixado automaticamente com o nome: RAT_[numero-chamado]_[data].pdf
-Arquivos Atualizados:
-index.html - Formulário completo
-style.css - Estilos responsivos
-script.js - Lógica corrigida ✨
-README.md - Instruções
-Todos os 3 arquivos estão prontos para você fazer upload no GitHub Pages! 🚀
-Teste agora em: /home/ubuntu/rat-generator-simples/
-index.html
-Código · 16.13 KB
-style.css
-Código · 6.46 KB
-script.js
-Código · 19.61 KB
-Gerador de RAT - Eunerd 3.0
-Markdown · 3.57 KB
-Ver todos os arquivos nesta tarefa
-Tarefa concluída
-Como foi este resultado?
-Sugestões de acompanhamento
-
-
-
-
-Publicar
-/
-Editar
-
-script.js
 // ============================================
 // VARIÁVEIS GLOBAIS
 // ============================================
@@ -56,7 +15,8 @@ let assinaturaClienteData = null;
 // ============================================
 // INICIALIZAÇÃO
 // ============================================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Página carregada');
     inicializarCanvases();
     carregarDados();
     adicionarEventListeners();
@@ -66,27 +26,56 @@ document.addEventListener('DOMContentLoaded', () => {
 // EVENT LISTENERS
 // ============================================
 function adicionarEventListeners() {
-    btnGerar.addEventListener('click', gerarPDF);
-    btnGerar2.addEventListener('click', gerarPDF);
-    btnLimpar.addEventListener('click', limparFormulario);
-    btnLimpar2.addEventListener('click', limparFormulario);
-    btnSalvar.addEventListener('click', salvarDados);
+    console.log('Adicionando event listeners');
+    
+    if (btnGerar) btnGerar.addEventListener('click', function(e) {
+        e.preventDefault();
+        gerarPDF();
+    });
+    
+    if (btnGerar2) btnGerar2.addEventListener('click', function(e) {
+        e.preventDefault();
+        gerarPDF();
+    });
+    
+    if (btnLimpar) btnLimpar.addEventListener('click', function(e) {
+        e.preventDefault();
+        limparFormulario();
+    });
+    
+    if (btnLimpar2) btnLimpar2.addEventListener('click', function(e) {
+        e.preventDefault();
+        limparFormulario();
+    });
+    
+    if (btnSalvar) btnSalvar.addEventListener('click', function(e) {
+        e.preventDefault();
+        salvarDados();
+    });
 
     // Salvar dados automaticamente a cada mudança
-    form.addEventListener('change', salvarDados);
-    form.addEventListener('input', salvarDados);
+    if (form) {
+        form.addEventListener('change', salvarDados);
+        form.addEventListener('input', salvarDados);
+    }
 }
 
 // ============================================
 // CANVASES - ASSINATURAS
 // ============================================
 function inicializarCanvases() {
+    console.log('Inicializando canvases');
     inicializarCanvas('canvasTecnico');
     inicializarCanvas('canvasCliente');
 }
 
 function inicializarCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
+    if (!canvas) {
+        console.error('Canvas não encontrado:', canvasId);
+        return;
+    }
+    
     const ctx = canvas.getContext('2d');
 
     // Ajustar tamanho do canvas
@@ -98,15 +87,15 @@ function inicializarCanvas(canvasId) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Mouse events
-    canvas.addEventListener('mousedown', (e) => iniciarDesenho(e, canvasId));
-    canvas.addEventListener('mousemove', (e) => desenhar(e, canvasId));
-    canvas.addEventListener('mouseup', () => pararDesenho());
-    canvas.addEventListener('mouseout', () => pararDesenho());
+    canvas.addEventListener('mousedown', function(e) { iniciarDesenho(e, canvasId); });
+    canvas.addEventListener('mousemove', function(e) { desenhar(e, canvasId); });
+    canvas.addEventListener('mouseup', function() { pararDesenho(); });
+    canvas.addEventListener('mouseout', function() { pararDesenho(); });
 
     // Touch events
-    canvas.addEventListener('touchstart', (e) => iniciarDesenho(e, canvasId));
-    canvas.addEventListener('touchmove', (e) => desenhar(e, canvasId));
-    canvas.addEventListener('touchend', () => pararDesenho());
+    canvas.addEventListener('touchstart', function(e) { iniciarDesenho(e, canvasId); });
+    canvas.addEventListener('touchmove', function(e) { desenhar(e, canvasId); });
+    canvas.addEventListener('touchend', function() { pararDesenho(); });
 }
 
 function iniciarDesenho(e, canvasId) {
@@ -169,12 +158,16 @@ function salvarAssinatura(canvasId, dataVar) {
 
     if (canvasId === 'canvasTecnico') {
         assinaturaTecnicoData = imageData;
-        document.getElementById('assinaturaTecnicoPreview').innerHTML = 
-            `<img src="${imageData}" alt="Assinatura Técnico" style="max-width: 100%; max-height: 100%;">`;
+        const preview = document.getElementById('assinaturaTecnicoPreview');
+        if (preview) {
+            preview.innerHTML = '<img src="' + imageData + '" alt="Assinatura Técnico" style="max-width: 100%; max-height: 100%;">';
+        }
     } else {
         assinaturaClienteData = imageData;
-        document.getElementById('assinaturaClientePreview').innerHTML = 
-            `<img src="${imageData}" alt="Assinatura Cliente" style="max-width: 100%; max-height: 100%;">`;
+        const preview = document.getElementById('assinaturaClientePreview');
+        if (preview) {
+            preview.innerHTML = '<img src="' + imageData + '" alt="Assinatura Cliente" style="max-width: 100%; max-height: 100%;">';
+        }
     }
 
     mostrarNotificacao('Assinatura salva com sucesso!');
@@ -184,6 +177,8 @@ function salvarAssinatura(canvasId, dataVar) {
 // SALVAR E CARREGAR DADOS
 // ============================================
 function salvarDados() {
+    if (!form) return;
+    
     const dados = new FormData(form);
     const obj = Object.fromEntries(dados);
 
@@ -192,43 +187,53 @@ function salvarDados() {
     obj.assinaturaClienteData = assinaturaClienteData;
 
     // Salvar checkboxes
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
         obj[checkbox.name] = checkbox.checked;
     });
 
     localStorage.setItem('ratFormData', JSON.stringify(obj));
-    mostrarNotificacao('Dados salvos automaticamente!');
+    console.log('Dados salvos');
 }
 
 function carregarDados() {
     const dados = localStorage.getItem('ratFormData');
     if (!dados) return;
 
-    const obj = JSON.parse(dados);
+    try {
+        const obj = JSON.parse(dados);
 
-    // Carregar campos de texto
-    Object.keys(obj).forEach(key => {
-        const input = form.elements[key];
-        if (input) {
-            if (input.type === 'checkbox') {
-                input.checked = obj[key] === true || obj[key] === 'true';
-            } else {
-                input.value = obj[key] || '';
+        // Carregar campos de texto
+        Object.keys(obj).forEach(function(key) {
+            const input = form.elements[key];
+            if (input) {
+                if (input.type === 'checkbox') {
+                    input.checked = obj[key] === true || obj[key] === 'true';
+                } else {
+                    input.value = obj[key] || '';
+                }
+            }
+        });
+
+        // Carregar assinaturas
+        if (obj.assinaturaTecnicoData) {
+            assinaturaTecnicoData = obj.assinaturaTecnicoData;
+            const preview = document.getElementById('assinaturaTecnicoPreview');
+            if (preview) {
+                preview.innerHTML = '<img src="' + assinaturaTecnicoData + '" alt="Assinatura Técnico" style="max-width: 100%; max-height: 100%;">';
             }
         }
-    });
 
-    // Carregar assinaturas
-    if (obj.assinaturaTecnicoData) {
-        assinaturaTecnicoData = obj.assinaturaTecnicoData;
-        document.getElementById('assinaturaTecnicoPreview').innerHTML = 
-            `<img src="${assinaturaTecnicoData}" alt="Assinatura Técnico" style="max-width: 100%; max-height: 100%;">`;
-    }
-
-    if (obj.assinaturaClienteData) {
-        assinaturaClienteData = obj.assinaturaClienteData;
-        document.getElementById('assinaturaClientePreview').innerHTML = 
-            `<img src="${assinaturaClienteData}" alt="Assinatura Cliente" style="max-width: 100%; max-height: 100%;">`;
+        if (obj.assinaturaClienteData) {
+            assinaturaClienteData = obj.assinaturaClienteData;
+            const preview = document.getElementById('assinaturaClientePreview');
+            if (preview) {
+                preview.innerHTML = '<img src="' + assinaturaClienteData + '" alt="Assinatura Cliente" style="max-width: 100%; max-height: 100%;">';
+            }
+        }
+        
+        console.log('Dados carregados');
+    } catch (err) {
+        console.error('Erro ao carregar dados:', err);
     }
 }
 
@@ -236,6 +241,8 @@ function carregarDados() {
 // GERAR PDF
 // ============================================
 function gerarPDF() {
+    console.log('Iniciando geração de PDF');
+    
     try {
         const dados = obterDadosFormulario();
         const html = criarHTMLPDF(dados);
@@ -249,19 +256,20 @@ function gerarPDF() {
         document.body.appendChild(element);
 
         // Aguardar um pouco para o DOM renderizar
-        setTimeout(() => {
+        setTimeout(function() {
             const opt = {
                 margin: [10, 10, 10, 10],
-                filename: `RAT_${dados.noChamadoCliente || 'sem-numero'}_${new Date().toISOString().split('T')[0]}.pdf`,
+                filename: 'RAT_' + (dados.noChamadoCliente || 'sem-numero') + '_' + new Date().toISOString().split('T')[0] + '.pdf',
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true, allowTaint: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().set(opt).from(element).save().then(() => {
+            html2pdf().set(opt).from(element).save().then(function() {
+                console.log('PDF gerado com sucesso');
                 document.body.removeChild(element);
                 mostrarNotificacao('PDF gerado com sucesso!');
-            }).catch(err => {
+            }).catch(function(err) {
                 console.error('Erro ao gerar PDF:', err);
                 mostrarNotificacao('Erro ao gerar PDF', true);
                 if (document.body.contains(element)) {
@@ -285,7 +293,7 @@ function obterDadosFormulario() {
     }
 
     // Checkboxes
-    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+    document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
         dados[checkbox.name] = checkbox.checked;
     });
 
@@ -297,7 +305,7 @@ function obterDadosFormulario() {
 }
 
 function criarHTMLPDF(dados) {
-    const getCheckbox = (checked) => checked ? '☑' : '☐';
+    const getCheckbox = function(checked) { return checked ? '☑' : '☐'; };
 
     return `
         <!DOCTYPE html>
@@ -317,7 +325,6 @@ function criarHTMLPDF(dados) {
                 .col-label { font-weight: bold; font-size: 10px; }
                 .signature-box { height: 40px; border: 1px solid #000; margin-top: 3px; }
                 .signature-img { max-width: 100%; max-height: 100%; }
-                .checkbox { display: inline-block; width: 12px; height: 12px; border: 1px solid #000; margin-right: 3px; }
             </style>
         </head>
         <body>
@@ -461,7 +468,7 @@ function criarHTMLPDF(dados) {
                             <span class="col-label">Nº documento:</span><br>${dados.nDocumentoTecnico || ''}<br>
                             <span class="col-label">Assinatura:</span>
                             <div class="signature-box">
-                                ${dados.assinaturaTecnicoData ? `<img src="${dados.assinaturaTecnicoData}" class="signature-img" alt="Assinatura">` : ''}
+                                ${dados.assinaturaTecnicoData ? '<img src="' + dados.assinaturaTecnicoData + '" class="signature-img" alt="Assinatura">' : ''}
                             </div>
                         </td>
                         <td style="width: 50%; vertical-align: top;">
@@ -470,7 +477,7 @@ function criarHTMLPDF(dados) {
                             <span class="col-label">Nº contato:</span><br>${dados.nContatoCliente || ''}<br>
                             <span class="col-label">Assinatura:</span>
                             <div class="signature-box">
-                                ${dados.assinaturaClienteData ? `<img src="${dados.assinaturaClienteData}" class="signature-img" alt="Assinatura">` : ''}
+                                ${dados.assinaturaClienteData ? '<img src="' + dados.assinaturaClienteData + '" class="signature-img" alt="Assinatura">' : ''}
                             </div>
                         </td>
                     </tr>
@@ -485,14 +492,19 @@ function criarHTMLPDF(dados) {
 // LIMPAR FORMULÁRIO
 // ============================================
 function limparFormulario() {
+    console.log('Limpando formulário');
+    
     if (!confirm('Tem certeza que deseja limpar todos os dados?')) return;
 
-    form.reset();
+    if (form) form.reset();
     assinaturaTecnicoData = null;
     assinaturaClienteData = null;
 
-    document.getElementById('assinaturaTecnicoPreview').innerHTML = '';
-    document.getElementById('assinaturaClientePreview').innerHTML = '';
+    const preview1 = document.getElementById('assinaturaTecnicoPreview');
+    if (preview1) preview1.innerHTML = '';
+    
+    const preview2 = document.getElementById('assinaturaClientePreview');
+    if (preview2) preview2.innerHTML = '';
 
     inicializarCanvases();
     localStorage.removeItem('ratFormData');
@@ -503,15 +515,16 @@ function limparFormulario() {
 // ============================================
 // NOTIFICAÇÕES
 // ============================================
-function mostrarNotificacao(mensagem, erro = false) {
+function mostrarNotificacao(mensagem, erro) {
+    if (erro === undefined) erro = false;
+    
     const notification = document.createElement('div');
-    notification.className = `notification ${erro ? 'error' : ''}`;
+    notification.className = 'notification' + (erro ? ' error' : '');
     notification.textContent = mensagem;
 
     document.body.appendChild(notification);
 
-    setTimeout(() => {
+    setTimeout(function() {
         notification.remove();
     }, 3000);
 }
-Como gerar um Relatório de Atendimento Técnico (RAT) online? - Manus
