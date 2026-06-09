@@ -1,0 +1,722 @@
+:root {
+    --primary-blue: #001e62;
+    --secondary-cyan: #00a4e4;
+    --border-dark: #1a1a1a;
+    --bg-web: #f1f5f9;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-web);
+    color: #000000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Painel Superior de Ações (Fixo e Não Sai no PDF) */
+.painel-acoes {
+    width: 100%;
+    max-width: 210mm;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+.btn-limpar {
+    background-color: #64748b;
+    color: white;
+}
+
+.btn-limpar:hover {
+    background-color: #475569;
+}
+
+.btn-anexar {
+    background-color: var(--secondary-cyan);
+    color: white;
+}
+
+.btn-anexar:hover {
+    background-color: #008cc2;
+}
+
+.btn-gerar {
+    background-color: var(--primary-blue);
+    color: white;
+    border: 1px solid var(--primary-blue);
+}
+
+.btn-gerar:hover {
+    background-color: #00133e;
+}
+
+/* Container de Pre-visualização de Fotos (Não sai no PDF) */
+.preview-fotos-container {
+    width: 100%;
+    max-width: 210mm;
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    display: none; /* Oculto se não houver fotos */
+}
+
+.preview-fotos-container h5 {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.grid-preview {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.foto-item {
+    position: relative;
+    aspect-ratio: 1/1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.foto-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.btn-remover-foto {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- FOLHA A4 DO RELATÓRIO --- */
+.rat-sheet {
+    background-color: #ffffff;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 10mm 12mm;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+
+/* Estilo para as páginas de fotos no PDF */
+.foto-page {
+    width: 210mm;
+    height: 297mm;
+    padding: 10mm;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    page-break-before: always;
+    background: white;
+    box-sizing: border-box;
+}
+
+.foto-page img {
+    max-width: 100%;
+    max-height: 250mm;
+    object-fit: contain;
+    border: 1px solid #eee;
+}
+
+.foto-page-legenda {
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+}
+
+/* Header Layout */
+.rat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.header-brand h1 {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    line-height: 1;
+}
+
+.header-brand h2 {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--secondary-cyan);
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.header-brand p {
+    font-size: 8px;
+    color: #555555;
+    line-height: 1.2;
+}
+
+.header-brand p a {
+    color: var(--secondary-cyan);
+    text-decoration: none;
+}
+
+.header-title-box {
+    border: 1.5px solid var(--border-dark);
+    padding: 6px 12px;
+    min-width: 180px;
+    text-align: center;
+}
+
+.header-title-box h3 {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* Divisores de Seção */
+.secao-titulo {
+    background-color: var(--primary-blue);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 8px;
+    margin-bottom: 0;
+    border: 1px solid var(--border-dark);
+    border-bottom: none;
+}
+
+/* Sistema de Grid */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    border: 1px solid var(--border-dark);
+    background-color: var(--border-dark);
+    column-gap: 1px;
+    row-gap: 0;
+}
+
+.col-12 { grid-column: span 12; }
+.col-9 { grid-column: span 9; }
+.col-8 { grid-column: span 8; }
+.col-6 { grid-column: span 6; }
+.col-5 { grid-column: span 5; }
+.col-4 { grid-column: span 4; }
+.col-3 { grid-column: span 3; }
+.col-2 { grid-column: span 2; }
+
+/* Campos Individuais */
+.field {
+    background-color: #ffffff;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.border-b-field {
+    border-bottom: 1px solid var(--border-dark);
+}
+
+.field label {
+    font-size: 8px;
+    font-weight: 700;
+    color: #333333;
+    text-transform: uppercase;
+    margin-bottom: 1px;
+}
+
+.field input[type="text"],
+.field input[type="date"],
+.field input[type="time"],
+.field select {
+    border: none;
+    outline: none;
+    font-size: 10px;
+    font-family: 'Inter', sans-serif;
+    color: #000000;
+    width: 100%;
+    padding: 1px 0;
+    background-color: transparent;
+}
+
+/* Seção Interna */
+.sub-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--border-dark);
+    background-color: #ffffff;
+}
+
+.sub-col {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.sub-col:first-child {
+    border-right: 1px solid var(--border-dark);
+}
+
+.sub-header-title {
+    background-color: #e2e8f0;
+    font-size: 9px;
+    font-weight: 800;
+    text-align: center;
+    padding: 3px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border-dark);
+}
+
+.sub-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    background-color: var(--border-dark);
+    column-gap: 1px;
+    row-gap: 0;
+    flex-grow: 1;
+}
+
+.sub-grid-atend {
+    grid-template-rows: auto auto 1fr; 
+}
+
+.sub-grid-equip {
+    grid-template-rows: auto auto auto 1fr;
+}
+
+.stretch-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+}
+
+/* Checkboxes */
+.chk-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 5px 6px;
+    background-color: #ffffff;
+    align-items: center;
+}
+
+.chk-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.chk-item input[type="checkbox"] {
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    accent-color: var(--primary-blue);
+}
+
+/* Textarea */
+.textarea-field {
+    background-color: #ffffff;
+    border: 1px solid var(--border-dark);
+    padding: 6px;
+}
+
+.textarea-field textarea {
+    width: 100%;
+    min-height: 250px;
+    border: none;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    resize: none;
+    overflow: hidden; /* Esconde a barra de rolagem */
+    white-space: pre-wrap; /* Permite quebra de linha */
+    word-wrap: break-word; /* Quebra palavras longas */
+    line-height: 1.3;
+}
+
+/* Termo e Assinaturas */
+.termo-aceite {
+    font-size: 8.5px;
+    color: #222222;
+    line-height: 1.3;
+    padding: 6px;
+    border: 1px solid var(--border-dark);
+    background-color: #f8fafc;
+    text-align: justify;
+}
+
+.assinaturas-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: var(--border-dark);
+    gap: 1px;
+    border: 1px solid var(--border-dark);
+}
+
+.col-assinatura {
+    background-color: #ffffff;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.canvas-area {
+    position: relative;
+    background-color: #fafafa;
+    border: 1px dashed #7f8c8d;
+    height: 65px;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.canvas-area canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+}
+
+.canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+}
+
+.btn-clear-canvas {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 2px 5px;
+    font-size: 8px;
+    font-weight: 700;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+/* Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(2px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 6px;
+    border: 2px solid var(--primary-blue);
+    width: 90%;
+    max-width: 420px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+.modal-box h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--primary-blue);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.modal-box p {
+    font-size: 13px;
+    color: #333333;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.btn-modal {
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-modal-cancelar {
+    background-color: #e2e8f0;
+    color: #333333;
+}
+
+.btn-modal-confirmar {
+    background-color: #ef4444;
+    color: white;
+}
+
+/* --- RESPONSIVIDADE (MOBILE) --- */
+@media screen and (max-width: 210mm) {
+    body {
+        padding: 10px;
+    }
+
+    .painel-acoes {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .rat-sheet {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        overflow-x: hidden;
+    }
+
+    .rat-header {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 15px;
+    }
+
+    .header-title-box {
+        width: 100%;
+        min-width: unset;
+    }
+
+    /* Ajuste de Grids para Mobile */
+    .form-grid {
+        display: block; /* Empilha os campos */
+        background-color: transparent;
+        border: none;
+    }
+
+    .field {
+        width: 100% !important;
+        border: 1px solid var(--border-dark) !important;
+        margin-bottom: -1px; /* Evita bordas duplas */
+        padding: 8px;
+    }
+
+    .field label {
+        font-size: 10px;
+    }
+
+    .field input[type="text"],
+    .field input[type="date"],
+    .field input[type="time"],
+    .field input[type="text"] {
+        font-size: 14px; /* Melhor para leitura no celular */
+        padding: 5px 0;
+    }
+
+    .sub-container {
+        display: block;
+        border: none;
+    }
+
+    .sub-col {
+        border: none !important;
+        margin-bottom: 15px;
+    }
+
+    .sub-grid {
+        display: block;
+        background-color: transparent;
+    }
+
+    .sub-header-title {
+        font-size: 12px;
+        padding: 8px;
+        border: 1px solid var(--border-dark);
+    }
+
+    .chk-container {
+        border: 1px solid var(--border-dark);
+        padding: 10px;
+        gap: 15px;
+    }
+
+    .chk-item {
+        font-size: 12px;
+    }
+
+    .chk-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+
+    .textarea-field textarea {
+        font-size: 14px;
+        min-height: 120px;
+    }
+
+    .termo-aceite {
+        font-size: 11px;
+        padding: 10px;
+    }
+
+    .assinaturas-row {
+        display: block;
+        background-color: transparent;
+        border: none;
+    }
+
+    .col-assinatura {
+        border: 1px solid var(--border-dark);
+        margin-bottom: 15px;
+        padding: 12px;
+    }
+
+    .canvas-area {
+        height: 120px; /* Maior para facilitar assinatura com o dedo */
+    }
+
+    .btn-clear-canvas {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}
+
+/* --- IMPRESSÃO / REGRAS DE PDF --- */
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        background-color: #ffffff;
+        padding: 0;
+        margin: 0;
+    }
+    .painel-acoes, .modal-overlay, .preview-fotos-container, .btn-clear-canvas {
+        display: none !important;
+    }
+    .rat-sheet {
+        box-shadow: none;
+        border: none;
+        padding: 10mm 12mm;
+        width: 210mm;
+        height: 297mm;
+        display: flex !important;
+        flex-direction: column !important;
+        page-break-after: always;
+    }
+    
+    /* Forçar layout de grid no PDF mesmo se gerado de um celular */
+    .form-grid {
+        display: grid !important;
+        grid-template-columns: repeat(12, 1fr) !important;
+        background-color: var(--border-dark) !important;
+        border: 1px solid var(--border-dark) !important;
+    }
+    .col-8 { grid-column: span 8 !important; }
+    .col-4 { grid-column: span 4 !important; }
+    .col-6 { grid-column: span 6 !important; }
+    .col-2 { grid-column: span 2 !important; }
+    .col-3 { grid-column: span 3 !important; }
+    .col-5 { grid-column: span 5 !important; }
+    .col-12 { grid-column: span 12 !important; }
+
+    .sub-container {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .sub-grid {
+        display: grid !important;
+        grid-template-columns: repeat(12, 1fr) !important;
+    }
+    .assinaturas-row {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+    }
+    .field {
+        padding: 4px 6px !important;
+    }
+    .field label { font-size: 8px !important; }
+    .field input { font-size: 10px !important; }
+    .canvas-area { height: 65px !important; }
+    
+    .foto-page {
+        display: flex !important;
+        visibility: visible !important;
+    }
+}
